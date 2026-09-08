@@ -12,7 +12,7 @@ module npu_controller (
 state_t state, next_state;
 
 logic [SRAM_ADDR_WIDTH-1:0] addr_cnt;
-logic [15:0]                cycle_cnt; // FIX: 7:0'dan 15:0'a cikarildi
+logic [15:0]                cycle_cnt;
 
 localparam int TOTAL_WAIT_CYCLES = (3 * N) + 1;
 
