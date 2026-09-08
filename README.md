@@ -38,14 +38,9 @@ You'll need `sv2v`, `iverilog`, and `gtkwave`.
 
 **To run the simulation:**
 ```bash
-# Convert SystemVerilog to Verilog
-sv2v Design/*.sv Verification/tb_npu_core.sv -w build_sim.v
-
-# Compile and run
-iverilog -g2012 -o npu_sim build_sim.v
+iverilog -g2012 -o npu_sim Design/npu_pkg.sv Design/mac_pe.sv Design/skew_buffer.sv Design/lattice_grid.sv Design/relu_activation.sv Design/sram_block.sv Design/npu_controller.sv Design/npu_core.sv Verification/tb_npu_core.sv
 vvp npu_sim
 
-# Check the waveforms
 gtkwave npu_sim.vcd
 
 ```
