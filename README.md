@@ -62,6 +62,3 @@ I ran this through generic Yosys synthesis using gate-level primitives. Here is 
 ## License
 
 Distributed under the MIT License.
-```
-
-```
