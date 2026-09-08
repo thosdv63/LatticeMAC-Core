@@ -44,6 +44,8 @@ gtkwave npu_sim.vcd
 
 ```
 
+![Verification Output](assets/image.png)
+
 If everything passes, the testbench will output: `SUCCESFULL: 16x16 NPU MATRIX PRODUCT AND RELU VERIFIED!`
 
 ## Synthesis Notes
@@ -57,8 +59,9 @@ I ran this through generic Yosys synthesis using gate-level primitives. Here is 
 
 *Note: This was a clean pass with 0 errors, but keep in mind these are generic synthesis numbers, not specific to any particular FPGA architecture's DSPs or BRAMs.*
 
-```
-
 ## License
 
 Distributed under the MIT License.
+```
+
+```
