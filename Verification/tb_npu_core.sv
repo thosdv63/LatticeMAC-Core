@@ -23,6 +23,9 @@ module tb_npu_core;
     logic [SRAM_DATA_WIDTH-1:0] tmp_din_a;
     logic [SRAM_DATA_WIDTH-1:0] tmp_din_b;
 
+    localparam int NUM_TESTS = 100;
+    integer test_run;
+
     logic signed [ACC_WIDTH-1:0] data_out_copy [0:(N*N)-1];
     genvar gi, gj;
     generate
@@ -57,25 +60,8 @@ module tb_npu_core;
         #20 rst_n = 1;
         #10;
 
-        // Filling matrices
-        for (i = 0; i < N*N; i = i + 1) begin
-            mat_a[i] = (i % 5) - 2;
-            mat_b[i] = (i % 4) - 1;
-        end
-
-        // Calculating expected output
-        for (i = 0; i < N; i = i + 1) begin
-            for (j = 0; j < N; j = j + 1) begin
-                sum = 0;
-                for (k = 0; k < N; k = k + 1) begin
-                    sum = sum + (mat_a[i*N + k] * mat_b[k*N + j]);
-                end
-                expected_relu[i*N + j] = (sum < 0) ? 0 : sum;
-            end
-        end
-
         // Reset sram
-        $display("SRAM memory is being reset (0-Padding)");
+        $display("SRAM memory is being reset (0-Padding)...");
         for (addr_idx = 0; addr_idx < (1<<SRAM_ADDR_WIDTH); addr_idx = addr_idx + 1) begin
             @(posedge clk);
             we_a      <= 1;
@@ -85,73 +71,74 @@ module tb_npu_core;
             ext_din_b <= '0;
         end
 
-        // Upload matrices
-        $display("Writing data to SRAM for %0dx%0d", N, N);
-        for (row = 0; row < N; row = row + 1) begin
-            @(posedge clk);
-            we_a     <= 1;
-            we_b     <= 1;
-            ext_addr <= row;
+        for (test_run = 1; test_run <= NUM_TESTS; test_run = test_run + 1) begin
             
-            tmp_din_a = '0;
-            tmp_din_b = '0;
-            
-            for (col = 0; col < N; col = col + 1) begin
-                tmp_din_a[col*DATA_WIDTH +: DATA_WIDTH] = mat_a[col*N + row]; // Transpose
-                tmp_din_b[col*DATA_WIDTH +: DATA_WIDTH] = mat_b[row*N + col]; // Satir
+            // random test data generation
+            for (i = 0; i < N*N; i = i + 1) begin
+                mat_a[i] = $signed($urandom_range(0, 255) - 128);
+                mat_b[i] = $signed($urandom_range(0, 255) - 128);
             end
-            
-            ext_din_a <= tmp_din_a;
-            ext_din_b <= tmp_din_b;
-        end
 
-        @(posedge clk);
-        we_a <= 0;
-        we_b <= 0;
-        #10;
-
-        $display("Matris Multiplication Started");
-        @(posedge clk);
-        start <= 1;
-        
-        @(posedge clk);
-        start <= 0;
-
-        wait(done_out == 1);
-        $display("Calculation Done");
-        #10;
-
-        $display("\nHARDWARE NPU OUTPUT");
-        for (i = 0; i < N; i = i + 1) begin
-            $write("Line %2d: ", i);
-            for (j = 0; j < N; j = j + 1) begin
-                $write("%6d ", data_out_copy[i*N + j]);
-            end
-            $display("");
-        end
-
-        $display("\nEXPECTED OUTPUT");
-        for (i = 0; i < N; i = i + 1) begin
-            $write("Line %2d: ", i);
-            for (j = 0; j < N; j = j + 1) begin
-                $write("%6d ", expected_relu[i*N + j]);
-            end
-            $display("");
-        end
-
-        // Error Scan
-        for (i = 0; i < N; i = i + 1) begin
-            for (j = 0; j < N; j = j + 1) begin
-                if (data_out_copy[i*N + j] !== expected_relu[i*N + j]) begin
-                    $display("\nERROR in: [%0d][%0d] -> Found: %0d, Expected: %0d", 
-                             i, j, data_out_copy[i*N + j], expected_relu[i*N + j]);
-                    $finish;
+            // expected output
+            for (i = 0; i < N; i = i + 1) begin
+                for (j = 0; j < N; j = j + 1) begin
+                    sum = 0;
+                    for (k = 0; k < N; k = k + 1) begin
+                        sum = sum + (mat_a[i*N + k] * mat_b[k*N + j]);
+                    end
+                    expected_relu[i*N + j] = (sum < 0) ? 0 : sum;
                 end
             end
+
+            // uploading data to sram
+            for (row = 0; row < N; row = row + 1) begin
+                @(posedge clk);
+                we_a     <= 1;
+                we_b     <= 1;
+                ext_addr <= row;
+                
+                tmp_din_a = '0;
+                tmp_din_b = '0;
+                
+                for (col = 0; col < N; col = col + 1) begin
+                    tmp_din_a[col*DATA_WIDTH +: DATA_WIDTH] = mat_a[col*N + row]; // Transpoze
+                    tmp_din_b[col*DATA_WIDTH +: DATA_WIDTH] = mat_b[row*N + col]; // Düz
+                end
+                
+                ext_din_a <= tmp_din_a;
+                ext_din_b <= tmp_din_b;
+            end
+
+            @(posedge clk);
+            we_a <= 0;
+            we_b <= 0;
+            #10;
+
+            @(posedge clk);
+            start <= 1;
+            
+            @(posedge clk);
+            start <= 0;
+
+            wait(done_out == 1);
+            #10;
+
+            // error check
+            for (i = 0; i < N; i = i + 1) begin
+                for (j = 0; j < N; j = j + 1) begin
+                    if (data_out_copy[i*N + j] !== expected_relu[i*N + j]) begin
+                        $display("\n[ERR! Test %0d - Index: [%0d][%0d] -> Found: %0d, Expected: %0d", 
+                                 test_run, i, j, data_out_copy[i*N + j], expected_relu[i*N + j]);
+                        $finish;
+                    end
+                end
+            end
+            
+            if (test_run % 10 == 0) $display("-> %0d Random test successful.", test_run);
         end
 
         $display("\n--------------------------------------------------");
-        $display("  SUCCESFULL: %0dx%0d NPU MATRIX PRODUCT AND RELU VERIFIED!", N, N);
+        $display("  SUCCESFULL: %0d RANDOMIZED TEST PASSED! (%0dx%0d NPU)", NUM_TESTS, N, N);
         $display("----------------------------------------------------\n");
         $finish;
     end
