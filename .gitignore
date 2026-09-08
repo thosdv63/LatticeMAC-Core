@@ -1,0 +1,9 @@
+# Simulation/Dump Files
+*.vcd
+*.vvp
+npu_sim
+build_*.v
+
+# Tool Binaries
+sv2v-Linux/
+sv2v-Linux.zip
