@@ -28,7 +28,6 @@ Data moves through the core in a cycle-accurate, pipelined flow:
   * `npu_core.sv` is the top-level module.
   * The rest of the core logic (`mac_pe.sv`, `lattice_grid.sv`, `sram_block.sv`, `skew_buffer.sv`, etc.) is also here.
 * `Verification/` - Testbenches. `tb_npu_core.sv` is the main system-level testbench you'll want to run.
-* `build_yosys.v` - The SV-to-Verilog converted file used for Yosys synthesis.
 
 ## Running Tests
 
@@ -57,12 +56,6 @@ I ran this through generic Yosys synthesis using gate-level primitives. Here is 
 * **Systolic Array (256 PEs):** 12,288 DFFs
 
 *Note: This was a clean pass with 0 errors, but keep in mind these are generic synthesis numbers, not specific to any particular FPGA architecture's DSPs or BRAMs.*
-
-**To run synthesis yourself:**
-
-```bash
-sv2v Design/*.sv -w build_yosys.v
-yosys -p "read_verilog build_yosys.v; synth -top npu_core; stat"
 
 ```
 
