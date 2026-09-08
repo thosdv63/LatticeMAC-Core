@@ -14,7 +14,7 @@ state_t state, next_state;
 logic [SRAM_ADDR_WIDTH-1:0] addr_cnt;
 logic [15:0]                cycle_cnt;
 
-localparam int TOTAL_WAIT_CYCLES = (3 * N) + 1;
+localparam int TOTAL_WAIT_CYCLES = (3 * N) + 2; 
 
 always_ff @(posedge clk or negedge rst_n) begin
     if (!rst_n) begin
