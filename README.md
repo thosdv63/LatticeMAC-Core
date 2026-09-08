@@ -50,7 +50,7 @@ If everything passes, the testbench will output: `SUCCESFULL: 16x16 NPU MATRIX P
 
 ## Synthesis Notes
 
-I ran this through generic Yosys synthesis using gate-level primitives. Here is a quick snapshot of the stats for the `npu_core` top module:
+I ran this through generic Yosys synthesis using gate-level primitives. Here is a quick snapshot of the stats for the `npu_core` top module in 16x16 matrix mode:
 
 * **Total Cells:** ~440,950
 * **Total DFFs:** 80,030
