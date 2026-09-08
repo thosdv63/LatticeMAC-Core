@@ -123,7 +123,7 @@ module tb_npu_core;
 
         $display("\nHARDWARE NPU OUTPUT");
         for (i = 0; i < N; i = i + 1) begin
-            $write("Satir %2d: ", i);
+            $write("Line %2d: ", i);
             for (j = 0; j < N; j = j + 1) begin
                 $write("%6d ", data_out_copy[i*N + j]);
             end
@@ -132,7 +132,7 @@ module tb_npu_core;
 
         $display("\nEXPECTED OUTPUT");
         for (i = 0; i < N; i = i + 1) begin
-            $write("Satir %2d: ", i);
+            $write("Line %2d: ", i);
             for (j = 0; j < N; j = j + 1) begin
                 $write("%6d ", expected_relu[i*N + j]);
             end
