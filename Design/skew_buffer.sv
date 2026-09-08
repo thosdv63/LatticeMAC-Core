@@ -3,6 +3,7 @@ import npu_pkg::*;
 module skew_buffer (
     input  logic    clk,
     input  logic    rst_n,
+    input  logic    clr_acc,
     input  vec_in_t din,
     output vec_in_t dout
 );
@@ -18,6 +19,10 @@ generate
 
             always_ff @(posedge clk or negedge rst_n) begin
                 if (!rst_n) begin
+                    for (int k = 0; k < i; k++) begin
+                        shift_reg[k] <= '0;
+                    end
+                end else if (clr_acc) begin
                     for (int k = 0; k < i; k++) begin
                         shift_reg[k] <= '0;
                     end
