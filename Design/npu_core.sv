@@ -25,7 +25,6 @@ module npu_core (
 
     matrix_acc_t grid_c_out;
 
-    // Adress MUX: start=1 FSM, start=0 uploading from outside
     assign final_sram_addr = (we_a || we_b) ? ext_addr : ctrl_sram_addr;
 
     npu_controller controller_inst (
@@ -54,17 +53,19 @@ module npu_core (
     );
 
     skew_buffer skew_a_inst (
-        .clk   (clk),
-        .rst_n (rst_n & ~clr_acc),
-        .din   (vec_in_t'(sram_dout_a)),
-        .dout  (skew_dout_a)
+        .clk     (clk),
+        .rst_n   (rst_n),
+        .clr_acc (clr_acc),
+        .din     (vec_in_t'(sram_dout_a)),
+        .dout    (skew_dout_a)
     );
 
     skew_buffer skew_b_inst (
-        .clk   (clk),
-        .rst_n (rst_n & ~clr_acc),
-        .din   (vec_in_t'(sram_dout_b)),
-        .dout  (skew_dout_b)
+        .clk     (clk),
+        .rst_n   (rst_n),
+        .clr_acc (clr_acc),
+        .din     (vec_in_t'(sram_dout_b)),
+        .dout    (skew_dout_b)
     );
 
     lattice_grid grid_inst (
@@ -77,6 +78,8 @@ module npu_core (
     );
 
     relu_activation relu_inst (
+        .clk      (clk),
+        .rst_n    (rst_n),
         .data_in  (grid_c_out),
         .data_out (data_out)
     );
